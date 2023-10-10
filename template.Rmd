@@ -1,8 +1,8 @@
 ---
-title: "My Thesis"
-subtitle: STK analysis
-date: "7-25-2023"
-author: Marziyeh S Jahromi
+title: "Astrocytes Kinome Profiling"
+subtitle: "STK_full"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author: "Marziyeh S Jahromi"
 format: 
   pdf:
     documentclass: "scrreport"
@@ -24,6 +24,7 @@ params:
 ```{r}
 #| label: "setup"
 #| include: FALSE
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -113,13 +114,7 @@ We will perform a couple of quality control steps to deal with negative values i
 # qc processing
 qc_data <- krsa_qc_steps(raw_data) %>% 
   mutate(
-  Group = case_when(
-    SampleName == "1" ~ "Male_Veh",
-    SampleName == "2" ~ "Male_Ins",
-    SampleName == "3" ~ "Female_Veh",
-    SampleName == "4" ~ "Female_Ins",
-    TRUE ~ SampleName
-  ),
+  Group = SampleName,
   SampleName = paste0(Group, "_" , Barcode)
 )
 
@@ -216,7 +211,7 @@ The heatmap represent all the peptides present on the chip except the positive/i
 #| fig-width: 6
 
 # Generates a heatmap using the modeled normalized data
-krsa_heatmap(data_modeled$normalized, clean_peptides, scale = "row")
+krsa_heatmap(data_modeled$normalized, clean_peptides, scale = "row", border = FALSE)
 
 ```
 
@@ -227,7 +222,7 @@ krsa_heatmap(data_modeled$normalized, clean_peptides, scale = "row")
 #| fig-width: 6
 
 # Generates a heatmap using the modeled grouped data
-krsa_heatmap_grouped(data_modeled$grouped, clean_peptides, scale = "row")
+krsa_heatmap_grouped(data_modeled$grouped, clean_peptides, scale = "row", border = FALSE)
 
 ```
 
@@ -235,20 +230,18 @@ krsa_heatmap_grouped(data_modeled$grouped, clean_peptides, scale = "row")
 
 To compare between samples, a two-group comparison is performed. In this case, there are three group comparisons:
 
--   AMPK KD Neuron + Untreated vs Wild Type Neuron + AICAR
--   AMPK KD Neuron + Untreated vs Wild Type Neuron + Untreated
--   AMPK KD Neuron + AICAR vs Wild Type Neuron + AICAR
+- Case 1 vs Control 1
 
 The *Slope_Transformed* ratio between each group, paired by chip, is calculated to the fold change. Based on the fold change, peptides that pass a certain fold change threshold are considered significant hits. Also, quality control steps applied in each comparison to filter out peptides that do not reach specific criteria:
 
--   The *Median_SigmBg* at max exposure *100ms* must be above a certain value\
--   $R^2$ of the linear model fit must be above a threshold value
+- The *Median_SigmBg* at max exposure *100ms* must be above a certain value\
+- $R^2$ of the linear model fit must be above a threshold value
 
 These *Filtering Parameters* (fold change threshold, QC criteria) can be modified to adjust the stringency of the analysis. The *Filtering Parameters* that are used for this analysis:
 
--   The *Median_SigmBg* at max exposure *100ms* must be equal or above 5\
--   $R^2$ of the linear model fit must be above or equal 0.8\
--   Log fold change (LFC) cutoffs at (0.2,0.3,0.4)
+- The *Median_SigmBg* at max exposure *100ms* must be equal or above 5\
+- $R^2$ of the linear model fit must be above or equal 0.8\
+- Log fold change (LFC) cutoffs at (0.2,0.3,0.4)
 
 ```{r}
 #| label: "group-comp-list"
@@ -260,12 +253,10 @@ These *Filtering Parameters* (fold change threshold, QC criteria) can be modifie
 # Also make sure that the label is unique for each block
 
 # Define Groups to be compared
-comparisons <- list (COMP1 = c(groups[2], groups[1]),
-                     COMP2 = c(groups[1], groups[3]),
-                     COMP3 = c(groups[1], groups[4]),
-                     COMP4 = c(groups[2], groups[3]),
-                     COMP5 = c(groups[2], groups[4]),
-                     COMP6 = c(groups[4], groups[3]))
+comparisons <- list(COMP1 = c(groups[2], groups[1]),
+                    COMP2 = c(groups[4], groups[3]),
+                    COMP3 = c(groups[1], groups[3]),
+                    COMP4 = c(groups[2], groups[4]))
 ```
 
 ```{r}
@@ -273,6 +264,10 @@ comparisons <- list (COMP1 = c(groups[2], groups[1]),
 #| echo: FALSE
 #| include: TRUE
 #| label: "childA"
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: "Heatmap of pairwise group comparison"
+run_prefix <- "krsa"
 
 case <- comparisons$COMP1[1]
 ctrl <- comparisons$COMP1[2]
@@ -291,6 +286,9 @@ cat(res, sep = "\n")
 #| echo: FALSE
 #| include: TRUE
 #| label: "childB"
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: "Heatmap of pairwise group comparison"
 
 case <- comparisons$COMP2[1]
 ctrl <- comparisons$COMP2[2]
@@ -309,6 +307,9 @@ cat(res, sep = "\n")
 #| echo: FALSE
 #| include: TRUE
 #| label: "childC"
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: "Heatmap of pairwise group comparison"
 
 case <- comparisons$COMP3[1]
 ctrl <- comparisons$COMP3[2]
@@ -327,6 +328,9 @@ cat(res, sep = "\n")
 #| echo: FALSE
 #| include: TRUE
 #| label: "childD"
+#| fig-width: 6
+#| fig-height: 6
+#| fig-cap: "Heatmap of pairwise group comparison"
 
 case <- comparisons$COMP4[1]
 ctrl <- comparisons$COMP4[2]
@@ -340,46 +344,10 @@ res <- knitr::knit_child(text = src, quiet = TRUE)
 cat(res, sep = "\n")
 ```
 
-
-```{r}
-#| results: "asis"
-#| echo: FALSE
-#| include: TRUE
-#| label: "childE"
-
-case <- comparisons$COMP5[1]
-ctrl <- comparisons$COMP5[2]
-random <- "E"
-threshold <- params$threshold
-
-src <- knitr::knit_expand(file = "_comparison.Rmd", case = case, ctrl = ctrl, threshold = threshold, chip = params$chip_type)
-
-res <- knitr::knit_child(text = src, quiet = TRUE)
-
-cat(res, sep = "\n")
-```
-
-```{r}
-#| results: "asis"
-#| echo: FALSE
-#| include: TRUE
-#| label: "childF"
-
-case <- comparisons$COMP6[1]
-ctrl <- comparisons$COMP6[2]
-random <- "F"
-threshold <- params$threshold
-
-src <- knitr::knit_expand(file = "_comparison.Rmd", case = case, ctrl = ctrl, threshold = threshold, chip = params$chip_type)
-
-res <- knitr::knit_child(text = src, quiet = TRUE)
-
-cat(res, sep = "\n")
-```
-
 ```{r}
 #| label: "fingerprint"
-#| eval: FALSE
+#| eval: false
+
 process_data <- function(file) {
   path <- file.path("results", file)
   
