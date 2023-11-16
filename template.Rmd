@@ -1,7 +1,7 @@
 ---
 title: "My Thesis"
-subtitle: STK analysis
-date: "7-25-2023"
+subtitle: STK analysis for GitHub
+date: "11-16-2023"
 author: Marziyeh S Jahromi
 format: 
   pdf:
@@ -216,7 +216,7 @@ The heatmap represent all the peptides present on the chip except the positive/i
 #| fig-width: 6
 
 # Generates a heatmap using the modeled normalized data
-krsa_heatmap(data_modeled$normalized, clean_peptides, scale = "row")
+krsa_heatmap(data_modeled$normalized, clean_peptides, scale = "row", border = FALSE)
 
 ```
 
@@ -227,7 +227,7 @@ krsa_heatmap(data_modeled$normalized, clean_peptides, scale = "row")
 #| fig-width: 6
 
 # Generates a heatmap using the modeled grouped data
-krsa_heatmap_grouped(data_modeled$grouped, clean_peptides, scale = "row")
+krsa_heatmap_grouped(data_modeled$grouped, clean_peptides, scale = "row", border = FALSE)
 
 ```
 
@@ -261,11 +261,9 @@ These *Filtering Parameters* (fold change threshold, QC criteria) can be modifie
 
 # Define Groups to be compared
 comparisons <- list (COMP1 = c(groups[2], groups[1]),
-                     COMP2 = c(groups[1], groups[3]),
-                     COMP3 = c(groups[1], groups[4]),
-                     COMP4 = c(groups[2], groups[3]),
-                     COMP5 = c(groups[2], groups[4]),
-                     COMP6 = c(groups[4], groups[3]))
+                     COMP2 = c(groups[4], groups[3]),
+                     COMP3 = c(groups[1], groups[3]),
+                     COMP4 = c(groups[2], groups[4]))
 ```
 
 ```{r}
@@ -341,41 +339,6 @@ cat(res, sep = "\n")
 ```
 
 
-```{r}
-#| results: "asis"
-#| echo: FALSE
-#| include: TRUE
-#| label: "childE"
-
-case <- comparisons$COMP5[1]
-ctrl <- comparisons$COMP5[2]
-random <- "E"
-threshold <- params$threshold
-
-src <- knitr::knit_expand(file = "_comparison.Rmd", case = case, ctrl = ctrl, threshold = threshold, chip = params$chip_type)
-
-res <- knitr::knit_child(text = src, quiet = TRUE)
-
-cat(res, sep = "\n")
-```
-
-```{r}
-#| results: "asis"
-#| echo: FALSE
-#| include: TRUE
-#| label: "childF"
-
-case <- comparisons$COMP6[1]
-ctrl <- comparisons$COMP6[2]
-random <- "F"
-threshold <- params$threshold
-
-src <- knitr::knit_expand(file = "_comparison.Rmd", case = case, ctrl = ctrl, threshold = threshold, chip = params$chip_type)
-
-res <- knitr::knit_child(text = src, quiet = TRUE)
-
-cat(res, sep = "\n")
-```
 
 ```{r}
 #| label: "fingerprint"
